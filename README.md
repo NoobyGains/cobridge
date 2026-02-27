@@ -66,6 +66,26 @@ graph LR
 
 ---
 
+## Documentation
+
+Full documentation is available in the [`docs/`](docs/) directory:
+
+| Guide | Description |
+|:------|:------------|
+| [Getting Started](docs/getting-started.md) | From zero to running API in 5 minutes |
+| [Copybook Parser](docs/copybook-parser.md) | All supported COBOL syntax with examples |
+| [Code Generation](docs/code-generation.md) | OpenAPI, TypeScript, and JSON Schema output |
+| [Data Marshalling](docs/data-marshalling.md) | EBCDIC, COMP-3, and binary data conversion |
+| [GnuCOBOL Bridge](docs/gnucobol-bridge.md) | Compiling and calling COBOL from Node.js |
+| [REST API Server](docs/rest-api-server.md) | Auto-generated HTTP endpoints and middleware |
+| [CLI Reference](docs/cli-reference.md) | Every command, flag, and option |
+| [API Reference](docs/api-reference.md) | Programmatic API for library usage |
+| [FAQ & Troubleshooting](docs/faq.md) | Common questions and solutions |
+| [Migration Guide](docs/migration-guide.md) | Moving from z/OS Connect or OpenLegacy |
+| [Contributing](CONTRIBUTING.md) | How to contribute to COBridge |
+
+---
+
 ## Quick Start
 
 ```bash
@@ -437,10 +457,14 @@ COBridge lets you keep the COBOL that works and wrap it with the interfaces mode
 
 Contributions are welcome. Whether it's a bug fix, a new feature, or documentation improvement — we'd love your help.
 
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide, including development setup, code style, and pull request process.
+
+Quick version:
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+3. Run the tests (`npm test` — all 177 must pass)
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
 5. Open a Pull Request
 
 See the [open issues](../../issues) for areas where help is needed.
