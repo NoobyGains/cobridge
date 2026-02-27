@@ -24,13 +24,14 @@
 
 ## The Problem
 
-```
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│  £2.4 TRILLION   │  │      95%         │  │     45/50       │  │      71%        │
-│  daily commerce  │  │ ATM transactions │  │   top banks     │  │  teams under-   │
-│  runs on COBOL   │  │ powered by COBOL │  │ use mainframes  │  │    staffed      │
-└─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────────┘
-```
+<table>
+<tr>
+<td align="center"><h3>£2.4 TRILLION</h3><sub>daily commerce runs on COBOL</sub></td>
+<td align="center"><h3>95%</h3><sub>of ATM transactions powered by COBOL</sub></td>
+<td align="center"><h3>45 / 50</h3><sub>top banks use mainframes</sub></td>
+<td align="center"><h3>71%</h3><sub>of COBOL teams are understaffed</sub></td>
+</tr>
+</table>
 
 COBOL isn't the problem. It processes **£2.4 trillion** in daily commerce, handles **95%** of ATM transactions, and runs core systems at **45 of the top 50** banks. It's fast, battle-tested, and reliable.
 
