@@ -26,6 +26,7 @@ export interface MarshalField {
   children?: MarshalField[];
   size?: number;         // Pre-calculated byte size (optional)
   signed?: boolean;      // Whether the field is signed (S prefix in PIC)
+  redefines?: string;    // Name of the field this one REDEFINES (overlapping storage)
 }
 
 // Re-export MarshalField as CopybookField for backward compat with tests
@@ -69,6 +70,11 @@ export function fromParserField(field: any): MarshalField {
     result.size = field.byteLength;
   } else if (field.size !== undefined) {
     result.size = field.size;
+  }
+
+  // Convert redefines
+  if (field.redefines) {
+    result.redefines = field.redefines;
   }
 
   // Convert children recursively
@@ -138,6 +144,9 @@ function fieldByteSize(field: MarshalField): number {
   if (field.children && field.children.length > 0) {
     let total = 0;
     for (const child of field.children) {
+      // REDEFINES fields share storage with the field they redefine,
+      // so they do not add to the group's total size.
+      if (child.redefines) continue;
       total += fieldByteSize(child) * (child.occurs || 1);
     }
     return total;
@@ -186,15 +195,73 @@ export function marshalToCobol(
 
   const buf = Buffer.alloc(totalSize);
   let offset = 0;
+  const topLevelOffsets = new Map<string, number>();
 
   for (const field of copybook) {
-    offset = marshalField(buf, offset, json, field, options);
+    offset = marshalField(buf, offset, json, field, options, topLevelOffsets);
   }
 
   return buf;
 }
 
 function marshalField(
+  buf: Buffer,
+  offset: number,
+  data: Record<string, any>,
+  field: MarshalField,
+  options: MarshalOptions,
+  siblingOffsets?: Map<string, number>
+): number {
+  const key = fieldKey(field.name);
+  const occurs = field.occurs || 1;
+
+  // Handle REDEFINES: write at the same offset as the redefined field
+  // and do NOT advance the caller's offset.
+  if (field.redefines && siblingOffsets) {
+    const redefOffset = siblingOffsets.get(field.redefines);
+    if (redefOffset !== undefined) {
+      // Marshal the REDEFINES view at the redefined field's offset
+      const tempOffset = redefOffset;
+      marshalFieldInner(buf, tempOffset, data, field, options);
+      // Return the original offset unchanged -- REDEFINES doesn't advance
+      return offset;
+    }
+  }
+
+  // Track this field's offset for potential REDEFINES lookups by later siblings
+  if (siblingOffsets) {
+    siblingOffsets.set(field.name, offset);
+  }
+
+  for (let i = 0; i < occurs; i++) {
+    let value: any;
+    if (occurs > 1) {
+      const arr = data[key];
+      value = Array.isArray(arr) ? arr[i] : undefined;
+    } else {
+      value = data[key];
+    }
+
+    if (field.children && field.children.length > 0) {
+      const groupData = (typeof value === 'object' && value !== null) ? value : {};
+      const childOffsets = new Map<string, number>();
+      for (const child of field.children) {
+        offset = marshalField(buf, offset, groupData, child, options, childOffsets);
+      }
+    } else {
+      const size = fieldByteSize(field);
+      writeFieldValue(buf, offset, value, field, size, options);
+      offset += size;
+    }
+  }
+
+  return offset;
+}
+
+/**
+ * Inner marshal for REDEFINES: writes data at a fixed offset without advancing.
+ */
+function marshalFieldInner(
   buf: Buffer,
   offset: number,
   data: Record<string, any>,
@@ -216,11 +283,13 @@ function marshalField(
     if (field.children && field.children.length > 0) {
       const groupData = (typeof value === 'object' && value !== null) ? value : {};
       for (const child of field.children) {
-        offset = marshalField(buf, offset, groupData, child, options);
+        offset = marshalFieldInner(buf, offset, groupData, child, options);
       }
     } else {
       const size = fieldByteSize(field);
-      writeFieldValue(buf, offset, value, field, size, options);
+      if (offset + size <= buf.length) {
+        writeFieldValue(buf, offset, value, field, size, options);
+      }
       offset += size;
     }
   }
@@ -335,9 +404,10 @@ export function marshalFromCobol(
 ): Record<string, any> {
   const result: Record<string, any> = {};
   let offset = 0;
+  const topLevelOffsets = new Map<string, number>();
 
   for (const field of copybook) {
-    const { value, newOffset } = unmarshalField(buffer, offset, field, options);
+    const { value, newOffset } = unmarshalField(buffer, offset, field, options, topLevelOffsets);
     result[fieldKey(field.name)] = value;
     offset = newOffset;
   }
@@ -349,24 +419,64 @@ function unmarshalField(
   buf: Buffer,
   offset: number,
   field: MarshalField,
-  options: MarshalOptions
+  options: MarshalOptions,
+  siblingOffsets?: Map<string, number>
 ): { value: any; newOffset: number } {
   const occurs = field.occurs || 1;
 
   if (occurs > 1) {
     const arr: any[] = [];
     for (let i = 0; i < occurs; i++) {
-      const { value, newOffset } = unmarshalSingleField(buf, offset, field, options);
+      const { value, newOffset } = unmarshalSingleField(buf, offset, field, options, siblingOffsets);
       arr.push(value);
       offset = newOffset;
     }
     return { value: arr, newOffset: offset };
   }
 
-  return unmarshalSingleField(buf, offset, field, options);
+  return unmarshalSingleField(buf, offset, field, options, siblingOffsets);
 }
 
 function unmarshalSingleField(
+  buf: Buffer,
+  offset: number,
+  field: MarshalField,
+  options: MarshalOptions,
+  siblingOffsets?: Map<string, number>
+): { value: any; newOffset: number } {
+  // Handle REDEFINES: read from the redefined field's offset,
+  // but don't advance the caller's offset.
+  if (field.redefines && siblingOffsets) {
+    const redefOffset = siblingOffsets.get(field.redefines);
+    if (redefOffset !== undefined) {
+      const { value } = unmarshalSingleFieldInner(buf, redefOffset, field, options);
+      return { value, newOffset: offset };
+    }
+  }
+
+  // Track this field's offset for REDEFINES lookups
+  if (siblingOffsets) {
+    siblingOffsets.set(field.name, offset);
+  }
+
+  if (field.children && field.children.length > 0) {
+    const group: Record<string, any> = {};
+    let groupOffset = offset;
+    const childOffsets = new Map<string, number>();
+    for (const child of field.children) {
+      const { value, newOffset } = unmarshalField(buf, groupOffset, child, options, childOffsets);
+      group[fieldKey(child.name)] = value;
+      groupOffset = newOffset;
+    }
+    return { value: group, newOffset: groupOffset };
+  }
+
+  const size = fieldByteSize(field);
+  const value = readFieldValue(buf, offset, field, size, options);
+  return { value, newOffset: offset + size };
+}
+
+function unmarshalSingleFieldInner(
   buf: Buffer,
   offset: number,
   field: MarshalField,

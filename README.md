@@ -28,15 +28,15 @@
 
 ```
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   $3 TRILLION    │  │      95%         │  │     45/50       │  │      71%        │
+│  £2.4 TRILLION   │  │      95%         │  │     45/50       │  │      71%        │
 │  daily commerce  │  │ ATM transactions │  │   top banks     │  │  teams under-   │
 │  runs on COBOL   │  │ powered by COBOL │  │ use mainframes  │  │    staffed      │
 └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────────┘
 ```
 
-COBOL isn't the problem. It processes **$3 trillion** in daily commerce, handles **95%** of ATM transactions, and runs core systems at **45 of the top 50** banks. It's fast, battle-tested, and reliable.
+COBOL isn't the problem. It processes **£2.4 trillion** in daily commerce, handles **95%** of ATM transactions, and runs core systems at **45 of the top 50** banks. It's fast, battle-tested, and reliable.
 
-**The real problem is the ecosystem around it.** Modern apps need REST APIs, JSON, and TypeScript types. Every attempt to rewrite COBOL into Java or Python degrades performance, introduces risk, and costs hundreds of millions of dollars.
+**The real problem is the ecosystem around it.** Modern apps need REST APIs, JSON, and TypeScript types. Every attempt to rewrite COBOL into Java or Python degrades performance, introduces risk, and costs hundreds of millions of pounds.
 
 **COBridge takes a different approach**: keep your COBOL running exactly as-is. Bridge it to the modern world.
 
@@ -351,14 +351,14 @@ cobridge/
 
 | | Rewrite | COBridge |
 |:--|:--------|:---------|
-| **Cost** | $50M - $500M | $0 |
+| **Cost** | £40M - £400M | £0 |
 | **Timeline** | 3 - 5 years | Days |
 | **Risk** | High (60%+ fail) | Near zero |
 | **COBOL changes** | Replace everything | None |
 | **Performance** | Often worse | Unchanged |
 | **Institutional knowledge** | Lost | Preserved |
 
-The Commonwealth Bank of Australia spent **$749 million** over 5 years replacing their COBOL core. Most organizations don't have that budget or that risk tolerance.
+The Commonwealth Bank of Australia spent **£600 million** over 5 years replacing their COBOL core. Most organisations don't have that budget or that risk tolerance.
 
 COBridge lets you keep the COBOL that works and wrap it with the interfaces modern teams expect. No rewrite. No risk. No cost.
 
