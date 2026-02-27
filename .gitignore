@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.local
+*.js.map
+coverage/
+.DS_Store
+*.tgz
+.npm
+.eslintcache
+*.log
+npm-debug.log*
+.idea/
+.vscode/
+*.swp
+*.swo
