@@ -1,15 +1,10 @@
 <div align="center">
 
-```
-   _____ ____  ____       _     _
-  / ____/ __ \|  _ \     (_)   | |
- | |   | |  | | |_) |_ __ _  __| | __ _  ___
- | |   | |  | |  _ <| '__| |/ _` |/ _` |/ _ \
- | |___| |__| | |_) | |  | | (_| | (_| |  __/
-  \_____\____/|____/|_|  |_|\__,_|\__, |\___|
-                                   __/ |
-                                  |___/
-```
+<h1>
+  <code>C O B r i d g e</code>
+</h1>
+
+<strong>COBOL &rarr; REST API &rarr; Modern World</strong>
 
 ### **Don't rewrite your COBOL. Bridge it.**
 
